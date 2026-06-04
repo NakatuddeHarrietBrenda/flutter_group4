@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/notification_provider.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -66,36 +67,15 @@ class _RegisterScreenState extends State<RegisterScreen>
     if (!mounted) return;
 
     if (success) {
-      // Show success snackbar then navigate to login
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: const Color(0xFF1E1E1E),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-            side: const BorderSide(color: Color(0xFFD4AF37)),
-          ),
-          content: const Row(
-            children: [
-              Icon(Icons.check_circle_outline_rounded,
-                  color: Color(0xFFD4AF37)),
-              SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Account created successfully! Please log in.',
-                  style: TextStyle(color: Color(0xFFF5F5F0)),
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-        ),
+      // Trigger registration success notification
+      Provider.of<NotificationProvider>(context, listen: false).addNotification(
+        title: 'Account Created',
+        message: 'Welcome to NutriBlend Haven! Your exclusive boutique account for ${_nameController.text.trim()} is ready.',
+        type: 'success',
       );
 
-      // Navigate to login, remove register from stack
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
+      // Navigate to home, remove register from stack
+      Navigator.of(context).pushReplacementNamed('/home');
     }
     // If !success the error is shown inline from the provider
   }
@@ -326,6 +306,44 @@ class _RegisterScreenState extends State<RegisterScreen>
                         );
                       },
                     ),
+                    const SizedBox(height: 16),
+
+                    // ── Continue as Guest Button ────────────────────────────
+                    SizedBox(
+                      width: double.infinity,
+                      height: 54,
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                          await authProvider.setGuestMode();
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Continuing as guest...'),
+                                backgroundColor: Color(0xFFD4AF37),
+                                duration: Duration(seconds: 1),
+                              ),
+                            );
+                            Navigator.pushReplacementNamed(context, '/home');
+                          }
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFD4AF37),
+                          side: const BorderSide(color: Color(0xFFD4AF37)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: const Text(
+                          'CONTINUE AS GUEST',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 24),
 
                     // ── Navigate to Login ───────────────────────────────────
@@ -357,6 +375,22 @@ class _RegisterScreenState extends State<RegisterScreen>
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pushNamed('/forgot-password');
+                        },
+                        child: const Text(
+                          'Forgot Password?',
+                          style: TextStyle(
+                            color: Color(0xFFD4AF37),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 32),

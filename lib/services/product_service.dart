@@ -25,11 +25,22 @@ class ProductService {
     };
   }
 
-  // Submit order simulation (POST /api/v1/orders)
-  Future<Map<String, dynamic>> createOrder(Map<String, dynamic> orderData) async {
-    // Week 5 - Making a POST Request
-    // We send order details (items, total, name, address, etc.)
-    final response = await _apiClient.post('/api/v1/orders', orderData);
+  // Submit order (POST /api/v1/orders)
+  Future<Map<String, dynamic>> createOrder(Map<String, dynamic> orderData, String token) async {
+    // Week 5 - Making a POST Request with Bearer Token Authorization
+    final response = await _apiClient.post('/api/v1/orders', orderData, token: token);
     return response;
+  }
+
+  // Fetch Regions (GET /api/v1/regions)
+  Future<List<dynamic>> fetchRegions() async {
+    final response = await _apiClient.get('/api/v1/regions');
+    return response['data'] ?? [];
+  }
+
+  // Fetch Towns cascading under a Region (GET /api/v1/regions/{regionId}/towns)
+  Future<List<dynamic>> fetchTowns(int regionId) async {
+    final response = await _apiClient.get('/api/v1/regions/$regionId/towns');
+    return response['data'] ?? [];
   }
 }

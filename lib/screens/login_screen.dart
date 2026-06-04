@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/notification_provider.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
 
@@ -263,7 +264,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      _showForgotPasswordDialog();
+                      Navigator.of(context).pushNamed('/forgot-password');
                     },
                     child: const Text(
                       'Forgot Password?',
@@ -402,12 +403,11 @@ class _LoginScreenState extends State<LoginScreen> {
     );
     
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Login successful! Welcome back!'),
-          backgroundColor: Color(0xFFD4AF37),
-          duration: Duration(seconds: 2),
-        ),
+      // Trigger login success notification
+      Provider.of<NotificationProvider>(context, listen: false).addNotification(
+        title: 'Login Successful',
+        message: 'Access Granted: Welcome back, ${authProvider.name ?? "Valued Customer"}!',
+        type: 'success',
       );
       Navigator.pushReplacementNamed(context, '/home');
     }
@@ -438,25 +438,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
   
-  void _showForgotPasswordDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: const Text('Reset Password', style: TextStyle(color: Color(0xFFD4AF37))),
-        content: const Text(
-          'Please contact support@nutriblend.com for password reset assistance.',
-          style: TextStyle(color: Colors.white),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close', style: TextStyle(color: Color(0xFFD4AF37))),
-          ),
-        ],
-      ),
-    );
-  }
+
   
   @override
   void dispose() {

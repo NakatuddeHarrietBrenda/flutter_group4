@@ -15,14 +15,22 @@ class ApiException implements Exception {
 }
 
 class ApiClient {
-  static const String baseUrl = 'https://admin.rasmuspharmaceuticals.com';
+  static const String baseUrl = 'https://testing.rasmuspharmaceuticals.com';
   final http.Client _client = http.Client();
 
-  // GET Request with Timeout and Error Handling
-  Future<dynamic> get(String path) async {
+  // GET Request with Timeout, Error Handling and Auth Token
+  Future<dynamic> get(String path, {String? token}) async {
     final uri = Uri.parse('$baseUrl$path');
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+
     try {
-      final response = await _client.get(uri)
+      final response = await _client.get(uri, headers: headers)
           .timeout(const Duration(seconds: 10));
 
       return _processResponse(response);
@@ -43,16 +51,21 @@ class ApiClient {
     }
   }
 
-  // POST Request with Timeout and JSON encoding
-  Future<dynamic> post(String path, Map<String, dynamic> body) async {
+  // POST Request with Timeout, JSON encoding and Auth Token
+  Future<dynamic> post(String path, Map<String, dynamic> body, {String? token}) async {
     final uri = Uri.parse('$baseUrl$path');
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+
     try {
       final response = await _client.post(
         uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: headers,
         body: jsonEncode(body),
       ).timeout(const Duration(seconds: 10));
 

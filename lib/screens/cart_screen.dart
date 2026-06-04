@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
+import '../providers/auth_provider.dart';
 import 'checkout_success.dart';
+import 'checkout_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -11,18 +13,6 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _addressController = TextEditingController();
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    _addressController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -327,7 +317,39 @@ class _CartScreenState extends State<CartScreen> {
             height: 52,
             child: ElevatedButton(
               onPressed: () {
-                _showCheckoutBottomSheet(context, provider);
+                final auth = Provider.of<AuthProvider>(context, listen: false);
+                if (!auth.isLoggedIn) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: const Color(0xFF1E1E1E),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: const BorderSide(color: Colors.redAccent),
+                      ),
+                      content: const Row(
+                        children: [
+                          Icon(Icons.error_outline_rounded, color: Colors.redAccent),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Authentication required. Please log in or sign up to checkout.',
+                              style: TextStyle(color: Color(0xFFF5F5F0)),
+                            ),
+                          ),
+                        ],
+                      ),
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                  Navigator.pushNamed(context, '/login');
+                } else {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const CheckoutScreen(),
+                    ),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFD4AF37),
@@ -372,222 +394,6 @@ class _CartScreenState extends State<CartScreen> {
             },
           ),
         ],
-      ),
-    );
-  }
-
-  void _showCheckoutBottomSheet(BuildContext context, CartProvider provider) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFF1A1A1A),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-                left: 20,
-                right: 20,
-                top: 24,
-              ),
-              child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: Colors.white24,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Secure Checkout',
-                        style: TextStyle(
-                          color: Color(0xFFF5F5F0),
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Playfair Display',
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Confirm details to complete order dispatch simulation.',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.4),
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      
-                      // Name Input
-                      _buildTextField(
-                        controller: _nameController,
-                        label: 'FullName',
-                        icon: Icons.person_outline_rounded,
-                        validator: (v) => v == null || v.trim().isEmpty ? 'Please enter your name' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      
-                      // Phone Input
-                      _buildTextField(
-                        controller: _phoneController,
-                        label: 'Mobile Money Number (UGX Pay)',
-                        icon: Icons.phone_android_rounded,
-                        keyboardType: TextInputType.phone,
-                        validator: (v) => v == null || v.trim().isEmpty ? 'Please enter your phone number' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      
-                      // Address Input
-                      _buildTextField(
-                        controller: _addressController,
-                        label: 'Delivery Physical Address',
-                        icon: Icons.local_shipping_outlined,
-                        maxLines: 2,
-                        validator: (v) => v == null || v.trim().isEmpty ? 'Please enter a shipping address' : null,
-                      ),
-                      
-                      // Checkout Error Notice
-                      if (provider.checkoutError != null) ...[
-                        const SizedBox(height: 14),
-                        Text(
-                          provider.checkoutError!,
-                          style: const TextStyle(color: Colors.redAccent, fontSize: 11),
-                        ),
-                      ],
-                      
-                      const SizedBox(height: 28),
-                      
-                      // Modal Confirm CTA
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton(
-                          onPressed: provider.isCheckingOut
-                              ? null
-                              : () async {
-                                  if (_formKey.currentState!.validate()) {
-                                    setModalState(() {});
-                                    
-                                    // Run checkout
-                                    final total = provider.totalAmount;
-                                    final name = _nameController.text;
-                                    
-                                    final success = await provider.checkout(
-                                      name: name,
-                                      phone: _phoneController.text,
-                                      address: _addressController.text,
-                                    );
-                                    
-                                    if (mounted) {
-                                      if (success) {
-                                        // Pop the BottomSheet drawer
-                                        Navigator.of(context).pop();
-                                        
-                                        // Go to Success receipt
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (context) => CheckoutSuccessScreen(
-                                              orderTotal: total,
-                                              customerName: name,
-                                            ),
-                                          ),
-                                        );
-                                      } else {
-                                        setModalState(() {});
-                                      }
-                                    }
-                                  }
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFD4AF37),
-                            foregroundColor: Colors.black,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          child: provider.isCheckingOut
-                              ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    color: Colors.black,
-                                  ),
-                                )
-                              : const Text(
-                                  'AUTHORIZE PAYMENT',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.5,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    int maxLines = 1,
-    TextInputType keyboardType = TextInputType.text,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
-      validator: validator,
-      style: const TextStyle(color: Colors.white, fontSize: 13),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 12),
-        prefixIcon: Icon(icon, color: const Color(0xFFD4AF37), size: 20),
-        filled: true,
-        fillColor: Colors.black.withOpacity(0.2),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: const Color(0xFFD4AF37).withOpacity(0.15)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: const Color(0xFFD4AF37).withOpacity(0.12)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFD4AF37), width: 1.2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.redAccent, width: 1),
-        ),
       ),
     );
   }

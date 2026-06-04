@@ -108,6 +108,7 @@ class CartProvider with ChangeNotifier {
     required String name,
     required String phone,
     required String address,
+    String? token,
   }) async {
     if (_items.isEmpty) return false;
 
@@ -140,7 +141,7 @@ class CartProvider with ChangeNotifier {
       // we'll run a safe mock catch if the server throws 404/500, but still return success with mock order receipt
       // so the user's checkout experience is fluid and flawless during presentation!
       try {
-        await _productService.createOrder(orderPayload);
+        await _productService.createOrder(orderPayload, token ?? '');
       } catch (e) {
         // If real endpoint isn't fully operational for orders, we simulate success for mock checkout,
         // so the presentation is never halted! 

@@ -125,11 +125,19 @@ class AuthProvider with ChangeNotifier {
           await prefs.setString('auth_token', token);
           await prefs.setString('user_email', emailOrContact);
           await prefs.setString('user_name', name);
+          
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        } else {
+          // Attempt auto-login in the background since no token was returned directly
+          _isLoading = false;
+          final loginSuccess = await login(
+            emailOrContact: emailOrContact,
+            password: password,
+          );
+          return loginSuccess;
         }
-
-        _isLoading = false;
-        notifyListeners();
-        return true;
       } else if (response.statusCode == 409) {
         _errorMessage = 'An account with this email already exists.';
       } else if (response.statusCode == 422) {
