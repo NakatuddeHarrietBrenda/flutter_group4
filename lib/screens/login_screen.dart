@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import 'register_screen.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -307,6 +309,57 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
                 
+                // Divider with "OR"
+                Row(
+                  children: [
+                    Expanded(
+                      child: Divider(
+                        color: Colors.white.withOpacity(0.3),
+                        thickness: 1,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.5),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: Colors.white.withOpacity(0.3),
+                        thickness: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                
+                // Continue as Guest Button
+                OutlinedButton(
+                  onPressed: _continueAsGuest,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFD4AF37),
+                    side: const BorderSide(color: Color(0xFFD4AF37)),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                  child: const Text(
+                    'CONTINUE AS GUEST',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
                 // Sign Up Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -316,9 +369,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(color: Colors.white.withOpacity(0.7)),
                     ),
                     TextButton(
-                      onPressed: () {
-                        _showSignUpDialog();
-                      },
+                      onPressed: _navigateToRegister,
                       child: const Text(
                         'Sign Up',
                         style: TextStyle(
@@ -346,8 +397,8 @@ class _LoginScreenState extends State<LoginScreen> {
     
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final success = await authProvider.login(
-      _emailOrContactController.text.trim(),
-      _passwordController.text,
+      emailOrContact: _emailOrContactController.text.trim(),
+      password: _passwordController.text,
     );
     
     if (success && mounted) {
@@ -360,6 +411,31 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       Navigator.pushReplacementNamed(context, '/home');
     }
+  }
+  
+  // Continue as Guest
+  Future<void> _continueAsGuest() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.setGuestMode();
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Continuing as guest...'),
+          backgroundColor: Color(0xFFD4AF37),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+  }
+  
+  // Navigate to Register Screen
+  void _navigateToRegister() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const RegisterScreen()),
+    );
   }
   
   void _showForgotPasswordDialog() {
@@ -376,26 +452,6 @@ class _LoginScreenState extends State<LoginScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Close', style: TextStyle(color: Color(0xFFD4AF37))),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  void _showSignUpDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: const Text('Create Account', style: TextStyle(color: Color(0xFFD4AF37))),
-        content: const Text(
-          'Registration feature coming soon! Please check back later.',
-          style: TextStyle(color: Colors.white),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK', style: TextStyle(color: Color(0xFFD4AF37))),
           ),
         ],
       ),
