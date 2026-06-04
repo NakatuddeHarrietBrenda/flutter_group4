@@ -7,6 +7,8 @@ import 'providers/product_provider.dart';
 
 // Screens
 import 'screens/splash_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/home_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,7 +59,13 @@ class MyApp extends StatelessWidget {
             elevation: 10,
           ),
         ),
-        home: const SplashScreen(),
+        // IMPORTANT: Start with SplashScreen
+        initialRoute: '/splash',
+        routes: {
+          '/splash': (context) => const SplashScreen(),
+          '/login': (context) => const LoginScreen(),
+          '/home': (context) => const HomeScreen(),
+        },
       ),
     );
   }
