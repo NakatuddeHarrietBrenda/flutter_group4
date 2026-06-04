@@ -96,6 +96,30 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Fetch a specific page (for strict pagination)
+  Future<void> fetchPage(int page) async {
+    if (page < 1 || page > _lastPage || _isLoading) return;
+
+    _isLoading = true;
+    _errorMessage = '';
+    _currentPage = page;
+    _products = []; // Clear for loading state
+    notifyListeners();
+
+    try {
+      final result = await _productService.fetchProducts(page: page);
+      _products = result['products'];
+      _currentPage = result['currentPage'];
+      _lastPage = result['lastPage'];
+      _totalProducts = result['total'];
+      _isLoading = false;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+    }
+    notifyListeners();
+  }
+
   // Load More (Pagination - Next Pages)
   Future<void> loadMoreProducts() async {
     if (_currentPage >= _lastPage || _isLoadMoreRunning || _isLoading) return;
