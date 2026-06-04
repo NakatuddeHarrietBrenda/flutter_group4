@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/product.model.dart';
 import '../providers/cart_provider.dart';
+import '../providers/wishlist_provider.dart';
 
 class ProductDetailScreen extends StatelessWidget {
   final Product product;
@@ -35,6 +36,47 @@ class ProductDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Consumer<WishlistProvider>(
+                  builder: (context, wishlistProvider, _) {
+                    final isInWishlist = wishlistProvider.isInWishlist(product.id);
+                    return CircleAvatar(
+                      backgroundColor: Colors.black.withOpacity(0.5),
+                      child: IconButton(
+                        icon: Icon(
+                          isInWishlist ? Icons.favorite : Icons.favorite_border_rounded,
+                          color: isInWishlist ? Colors.redAccent : Colors.white,
+                          size: 18,
+                        ),
+                        onPressed: () {
+                          wishlistProvider.toggleWishlist(product);
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              backgroundColor: const Color(0xFF1E1E1E),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                side: const BorderSide(color: Color(0xFFD4AF37), width: 1),
+                              ),
+                              content: Text(
+                                isInWishlist
+                                    ? '${product.name} removed from wishlist'
+                                    : '${product.name} added to wishlist!',
+                                style: const TextStyle(color: Color(0xFFF5F5F0)),
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 fit: StackFit.expand,
