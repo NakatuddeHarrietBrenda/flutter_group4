@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final userName = authProvider.name ?? (authProvider.isGuestMode ? 'Guest' : 'Harriet');
+    final userEmail = authProvider.email ?? (authProvider.isGuestMode ? 'guest@nutriblend.com' : 'harriet@gmail.com');
+
     return Scaffold(
       backgroundColor: const Color(0xFF0F0F0F),
       appBar: AppBar(
@@ -52,9 +58,9 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Harriet',
-                style: TextStyle(
+              Text(
+                userName,
+                style: const TextStyle(
                   color: Color(0xFFF5F5F0),
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -63,25 +69,35 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'harriet@gmail.com',
+                userEmail,
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.6),
                   fontSize: 14,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                '+256756890122',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
-                  fontSize: 14,
+              if (!authProvider.isGuestMode) ...[
+                const SizedBox(height: 4),
+                Text(
+                  '+256756890122',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.6),
+                    fontSize: 14,
+                  ),
                 ),
-              ),
+              ],
               const SizedBox(height: 40),
               _buildProfileOption(Icons.settings_outlined, 'Settings'),
               _buildProfileOption(Icons.history_outlined, 'Order History'),
               _buildProfileOption(Icons.help_outline, 'Help & Support'),
-              _buildProfileOption(Icons.logout, 'Logout', isDestructive: true),
+              _buildProfileOption(
+                Icons.logout,
+                authProvider.isGuestMode ? 'Log In / Register' : 'Logout',
+                isDestructive: true,
+                onTap: () async {
+                  await authProvider.logout();
+                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                },
+              ),
             ],
           ),
         ),
@@ -89,7 +105,12 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileOption(IconData icon, String title, {bool isDestructive = false}) {
+  Widget _buildProfileOption(
+    IconData icon,
+    String title, {
+    bool isDestructive = false,
+    VoidCallback? onTap,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -116,7 +137,7 @@ class ProfileScreen extends StatelessWidget {
           size: 16,
           color: Colors.white30,
         ),
-        onTap: () {},
+        onTap: onTap ?? () {},
       ),
     );
   }

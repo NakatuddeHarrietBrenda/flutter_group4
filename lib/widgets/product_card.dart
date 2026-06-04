@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/product.model.dart';
 import '../providers/cart_provider.dart';
+import '../providers/wishlist_provider.dart';
 import '../screens/product_detail.dart';
 
 class ProductCard extends StatelessWidget {
@@ -150,6 +151,38 @@ class ProductCard extends StatelessWidget {
                             letterSpacing: 0.5,
                           ),
                         ),
+                      ),
+                    ),
+
+                    // Wishlist Toggle
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Consumer<WishlistProvider>(
+                        builder: (context, wishlistProvider, _) {
+                          final isInWishlist = wishlistProvider.isInWishlist(product.id);
+                          return GestureDetector(
+                            onTap: () {
+                              wishlistProvider.toggleWishlist(product);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: const Color(0xFFD4AF37).withOpacity(0.3),
+                                  width: 0.5,
+                                ),
+                              ),
+                              child: Icon(
+                                isInWishlist ? Icons.favorite : Icons.favorite_border,
+                                color: isInWishlist ? Colors.redAccent : const Color(0xFFD4AF37),
+                                size: 16,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
