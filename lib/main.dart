@@ -4,9 +4,12 @@ import 'package:provider/provider.dart';
 // Providers
 import 'providers/cart_provider.dart';
 import 'providers/product_provider.dart';
+import 'providers/auth_provider.dart';
 
 // Screens
 import 'screens/splash_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/main_navigation.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +25,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
       child: MaterialApp(
         title: 'NutriBlend Haven',
@@ -57,7 +61,13 @@ class MyApp extends StatelessWidget {
             elevation: 10,
           ),
         ),
-        home: const SplashScreen(),
+        // IMPORTANT: Start with SplashScreen
+        initialRoute: '/splash',
+        routes: {
+          '/splash': (context) => const SplashScreen(),
+          '/login': (context) => const LoginScreen(),
+          '/home': (context) => const MainNavigation(),
+        },
       ),
     );
   }

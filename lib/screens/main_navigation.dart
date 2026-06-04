@@ -65,7 +65,7 @@ class _MainNavigationState extends State<MainNavigation> {
             const BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home_rounded),
-              label: 'Boutique',
+              label: 'Products',
             ),
             
             // Cart Tab with live Badge
