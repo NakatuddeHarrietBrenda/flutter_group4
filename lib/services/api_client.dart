@@ -15,7 +15,8 @@ class ApiException implements Exception {
 }
 
 class ApiClient {
-  static const String baseUrl = 'https://testing.rasmuspharmaceuticals.com';
+  // static const String baseUrl = 'https://testing.rasmuspharmaceuticals.com';
+  static const String baseUrl = 'http://localhost:5000';
   final http.Client _client = http.Client();
 
   // GET Request with Timeout, Error Handling and Auth Token

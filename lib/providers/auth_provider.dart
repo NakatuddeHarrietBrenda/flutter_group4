@@ -10,8 +10,9 @@ class AuthProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   bool _isGuestMode = false;
-
-  final String _baseUrl = 'https://testing.rasmuspharmaceuticals.com/api/v1';
+  
+  // final String _baseUrl = 'https://testing.rasmuspharmaceuticals.com/api/v1';
+  final String _baseUrl = 'http://localhost:5000/api/v1';
 
   // Getters
   bool get isLoggedIn => _token != null && _token!.isNotEmpty && !_isGuestMode;
@@ -253,3 +254,5 @@ class AuthProvider with ChangeNotifier {
     }
   }
 }
+
+
