@@ -76,6 +76,39 @@ class _ShimmerLoaderState extends State<ShimmerLoader>
   }
 }
 
+class DropdownShimmer extends StatelessWidget {
+  const DropdownShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const ShimmerLoader(
+      width: double.infinity,
+      height: 55,
+      borderRadius: 8,
+    );
+  }
+}
+
+class CheckoutShimmer extends StatelessWidget {
+  const CheckoutShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: const [
+        DropdownShimmer(),
+        SizedBox(height: 16),
+        DropdownShimmer(),
+        SizedBox(height: 16),
+        ShimmerLoader(
+          width: double.infinity,
+          height: 100,
+        ),
+      ],
+    );
+  }
+}
+
 class ProductGridShimmer extends StatelessWidget {
   const ProductGridShimmer({super.key});
 
